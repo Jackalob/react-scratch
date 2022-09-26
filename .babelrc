@@ -1,3 +1,9 @@
 {
   "presets": ["@babel/preset-env", "@babel/preset-react"]
 }
+
+/**
+ * 一個 preset 指的是一組 plugins 的集合
+ * @babel/preset-env 包含所有es6轉化為es5的翻譯規則，根據要支持的瀏覽器，決定使用哪些transformations / plugins 和 polyfills，為舊瀏覽器提供現代瀏覽器的新特性
+ * @babel/preset-react 支援 React ES6 的寫法，同時直接也可以支援JSX語法格式
+ */
