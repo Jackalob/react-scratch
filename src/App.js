@@ -4,7 +4,7 @@ import CustomInputNumber from "./components/CustomInputNumber";
 const App = () => {
   return (
     <div className="w-full h-full flex justify-center items-center">
-      <CustomInputNumber />
+      <CustomInputNumber min={-2} max={5} />
     </div>
   );
 };
