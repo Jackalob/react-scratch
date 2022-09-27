@@ -1,31 +1,55 @@
 import React, { useState } from "react";
+import clsx from "clsx";
 import PropTypes from "prop-types";
 import { IconAdd, IconRemove } from "../assets/icons";
 import { KEYCODE } from "../utils/keycode";
 
-const CustomInputNumber = ({ min, max }) => {
-  const [number, setNumber] = useState(0);
+const CustomInputNumber = ({
+  min,
+  max,
+  step = 1,
+  name,
+  value = 0,
+  disabled,
+  onChange,
+  onBlur,
+}) => {
+  if ((min && value < min) || (max && value > max)) {
+    throw new Error("value must be greater than min and less than max");
+  }
+
+  const [number, setNumber] = useState(value);
 
   const handleChange = (e) => {
     setNumber(e.target.value);
+    onChange(e);
   };
 
   const handleDecrementClick = () => {
-    setNumber((num) => num - 1);
+    if (disabled) return;
+    if (number - step <= min) {
+      setNumber(min);
+    } else {
+      setNumber((num) => num - step);
+    }
   };
 
   const handleIncrementClick = () => {
-    setNumber((num) => num + 1);
+    if (disabled) return;
+    if (number + step >= max) {
+      setNumber(max);
+    } else {
+      setNumber((num) => num + step);
+    }
   };
 
   const handleKeyDown = (e) => {
-    // TODO 可以再優化
     const { which } = e;
-    if (which === KEYCODE.LEFT && number !== min) {
-      handleDecrementClick();
+    if (which === KEYCODE.LEFT) {
+      handleDecrementClick(e);
       e.preventDefault();
-    } else if (which === KEYCODE.RIGHT && number !== max) {
-      handleIncrementClick();
+    } else if (which === KEYCODE.RIGHT) {
+      handleIncrementClick(e);
       e.preventDefault();
     }
   };
@@ -37,25 +61,35 @@ const CustomInputNumber = ({ min, max }) => {
     >
       <div className="grid grid-cols-3 gap-2">
         <button
-          className="w-12 h-12 border-2 border-blue-400 rounded flex justify-center items-center"
+          className={clsx(
+            "w-12 h-12 border-2 border-blue-400 rounded fill-blue-400 flex justify-center items-center focus:outline-none",
+            disabled && "border-slate-200 fill-slate-200"
+          )}
           onClick={handleDecrementClick}
         >
-          <IconRemove className="fill-blue-400" />
+          <IconRemove />
         </button>
         <input
-          className="w-12 h-12 border-2 rounded text-center text-base "
+          className="w-12 h-12 border-2 rounded text-center text-base"
+          name={name}
           onChange={handleChange}
-          value={number}
+          onBlur={onBlur}
           type="number"
           autoComplete="off"
           min={min}
           max={max}
+          step={step}
+          value={number}
+          disabled={disabled}
         />
         <button
-          className="w-12 h-12 border-2 border-blue-400 rounded flex justify-center items-center"
+          className={clsx(
+            "w-12 h-12 border-2 border-blue-400 rounded fill-blue-400 flex justify-center items-center focus:outline-none",
+            disabled && "border-slate-200 fill-slate-200"
+          )}
           onClick={handleIncrementClick}
         >
-          <IconAdd className="fill-blue-400" />
+          <IconAdd />
         </button>
       </div>
     </div>
@@ -66,6 +100,9 @@ CustomInputNumber.propTypes = {
   min: PropTypes.number,
   max: PropTypes.number,
   step: PropTypes.number,
+  disabled: PropTypes.bool,
+  onChange: PropTypes.func,
+  onBlur: PropTypes.func,
 };
 
 export default CustomInputNumber;
