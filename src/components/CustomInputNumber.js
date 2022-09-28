@@ -66,6 +66,7 @@ const CustomInputNumber = ({
             disabled && "border-slate-200 fill-slate-200"
           )}
           onClick={handleDecrementClick}
+          data-testid="decrement-button"
         >
           <IconRemove />
         </button>
@@ -81,6 +82,7 @@ const CustomInputNumber = ({
           step={step}
           value={number}
           disabled={disabled}
+          data-testid="input"
         />
         <button
           className={clsx(
@@ -88,6 +90,7 @@ const CustomInputNumber = ({
             disabled && "border-slate-200 fill-slate-200"
           )}
           onClick={handleIncrementClick}
+          data-testid="increment-button"
         >
           <IconAdd />
         </button>
