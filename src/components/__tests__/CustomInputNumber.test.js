@@ -28,8 +28,41 @@ test("input number increments and decrements when the arrow keys are pressed", a
   customInputNumber.focus();
 
   expect(input).toHaveValue(0);
-  await userEvent.keyboard("{ArrowRight}");
-  expect(input).toHaveValue(1);
-  await userEvent.keyboard("{ArrowLeft}");
+  await userEvent.keyboard("{ArrowRight>5}");
+  expect(input).toHaveValue(5);
+  await userEvent.keyboard("{ArrowLeft>5}");
   expect(input).toHaveValue(0);
 });
+
+describe("console errors", () => {
+  beforeAll(() => {
+    jest.spyOn(console, "error").mockImplementation(() => {});
+  });
+
+  afterAll(() => {
+    console.error.mockRestore();
+  });
+
+  test("given input number value must be greater than min", async () => {
+    expect(() =>
+      render(<CustomInputNumber value={10} max={500} min={100} />)
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"value must be greater than min and less than max"`
+    );
+    expect(console.error).toHaveBeenCalled();
+  });
+
+  test("given input number value must be less than max", async () => {
+    expect(() =>
+      render(<CustomInputNumber value={10} max={5} min={1} />)
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"value must be greater than min and less than max"`
+    );
+    expect(console.error).toHaveBeenCalled();
+  });
+});
+
+// test("input number is not greater than max or less than min when the value changes", async () => {
+//   const m
+//   render(<CustomInputNumber />);
+// })
