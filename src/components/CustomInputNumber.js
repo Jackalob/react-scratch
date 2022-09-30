@@ -22,7 +22,7 @@ const CustomInputNumber = ({
 
   const handleChange = (e) => {
     setNumber(e.target.value);
-    onChange(e);
+    onChange?.(e);
   };
 
   const handleDecrementClick = () => {
@@ -44,11 +44,11 @@ const CustomInputNumber = ({
   };
 
   const handleKeyDown = (e) => {
-    const { which } = e;
-    if (which === KEYCODE.LEFT) {
+    const { code } = e;
+    if (code === KEYCODE.LEFT) {
       handleDecrementClick(e);
       e.preventDefault();
-    } else if (which === KEYCODE.RIGHT) {
+    } else if (code === KEYCODE.RIGHT) {
       handleIncrementClick(e);
       e.preventDefault();
     }
@@ -57,6 +57,8 @@ const CustomInputNumber = ({
   return (
     <div
       className="border-2 border-dashed border-slate-400 p-2"
+      data-testid="custom-input-number"
+      tabIndex={0}
       onKeyDown={handleKeyDown}
     >
       <div className="grid grid-cols-3 gap-2">
