@@ -62,7 +62,50 @@ describe("console errors", () => {
   });
 });
 
-// test("input number is not greater than max or less than min when the value changes", async () => {
-//   const m
-//   render(<CustomInputNumber />);
-// })
+test("step prop works", async () => {
+  const step = 5;
+  render(<CustomInputNumber step={step} />);
+
+  const customInputNumber = screen.getByTestId("custom-input-number");
+  const decrement = screen.getByTestId("decrement-button");
+  const increment = screen.getByTestId("increment-button");
+  const input = screen.getByTestId("input");
+
+  expect(input).toHaveValue(0);
+  await userEvent.click(increment);
+  expect(input).toHaveValue(5);
+  await userEvent.click(decrement);
+  expect(input).toHaveValue(0);
+
+  customInputNumber.focus();
+  await userEvent.keyboard("{ArrowRight}");
+  expect(input).toHaveValue(5);
+  await userEvent.keyboard("{ArrowLeft}");
+  expect(input).toHaveValue(0);
+});
+
+test("input number is not greater than max or less than min when the value changes", async () => {
+  const max = 15,
+    min = 0,
+    value = 1,
+    step = 5;
+  render(<CustomInputNumber step={step} value={value} max={max} min={min} />);
+
+  const decrement = screen.getByTestId("decrement-button");
+  const increment = screen.getByTestId("increment-button");
+  const input = screen.getByTestId("input");
+
+  // to min
+  const decrementTimes = Math.floor((value - min) / step) + 1;
+  for (let i = 0; i < decrementTimes + 1; i++) {
+    await userEvent.click(decrement);
+  }
+  expect(input).toHaveValue(min);
+
+  // to max
+  const incrementTimes = Math.floor((max - min) / step) + 1;
+  for (let i = 0; i < incrementTimes + 1; i++) {
+    await userEvent.click(increment);
+  }
+  expect(input).toHaveValue(max);
+});
