@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import clsx from "clsx";
 import PropTypes from "prop-types";
 import { IconAdd, IconRemove } from "../assets/icons";
@@ -21,8 +21,7 @@ const CustomInputNumber = ({
   const [number, setNumber] = useState(value);
 
   const handleChange = (e) => {
-    setNumber(e.target.value);
-    onChange?.(e);
+    setNumber(+e.target.value);
   };
 
   const handleDecrementClick = () => {
@@ -54,11 +53,27 @@ const CustomInputNumber = ({
     }
   };
 
+  const handleContainerBlur = (e) => {
+    const isChildrenElement = e.currentTarget.contains(e.relatedTarget);
+    if (!isChildrenElement) {
+      onBlur?.(e);
+    }
+  };
+
+  const handleInputBlur = (e) => {
+    e.target.value = +e.target.value;
+  };
+
+  useEffect(() => {
+    onChange?.(number);
+  }, [number]);
+
   return (
     <div
       className="border-2 border-dashed border-slate-400 p-2"
       data-testid="custom-input-number"
       tabIndex={0}
+      onBlur={handleContainerBlur}
       onKeyDown={handleKeyDown}
     >
       <div className="grid grid-cols-3 gap-2">
@@ -76,7 +91,7 @@ const CustomInputNumber = ({
           className="w-12 h-12 border-2 rounded text-center text-base"
           name={name}
           onChange={handleChange}
-          onBlur={onBlur}
+          onBlur={handleInputBlur}
           type="number"
           autoComplete="off"
           min={min}

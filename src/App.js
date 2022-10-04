@@ -5,7 +5,7 @@ const App = () => {
   return (
     <div className="w-full h-full flex justify-center items-center">
       <CustomInputNumber
-        onChange={(e) => console.log("change:", e)}
+        onChange={(v) => console.log("change:", v)}
         onBlur={(e) => console.log("blur:", e)}
       />
     </div>
