@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useLayoutEffect, useRef } from "react";
 import clsx from "clsx";
 import PropTypes from "prop-types";
 import { IconAdd, IconRemove } from "../assets/icons";
@@ -9,46 +9,59 @@ const CustomInputNumber = ({
   max,
   step = 1,
   name,
-  value = 0,
+  value,
+  defaultValue,
   disabled,
   onChange,
   onBlur,
 }) => {
-  if ((min && value < min) || (max && value > max)) {
+  const [inputValue, setInputValue] = useState(() => {
+    const initValue = defaultValue ?? value;
+    return initValue ?? 0;
+  });
+
+  if ((min && inputValue < min) || (max && inputValue > max)) {
     throw new Error("value must be greater than min and less than max");
   }
 
-  const [number, setNumber] = useState(value);
+  const updateValue = (v) => {
+    if (isNaN(+value)) {
+      setInputValue(v);
+    }
+    onChange?.(v);
+  };
+
+  // TODO  if input value > max then setInputValue to max, min also
 
   const handleChange = (e) => {
-    setNumber(+e.target.value);
+    updateValue(+e.target.value);
   };
 
   const handleDecrementClick = () => {
     if (disabled) return;
-    if (number - step <= min) {
-      setNumber(min);
+    if (inputValue - step <= min) {
+      updateValue(min);
     } else {
-      setNumber((num) => num - step);
+      updateValue(inputValue - step);
     }
   };
 
   const handleIncrementClick = () => {
     if (disabled) return;
-    if (number + step >= max) {
-      setNumber(max);
+    if (inputValue + step >= max) {
+      updateValue(max);
     } else {
-      setNumber((num) => num + step);
+      updateValue(inputValue + step);
     }
   };
 
   const handleKeyDown = (e) => {
     const { code } = e;
     if (code === KEYCODE.LEFT) {
-      handleDecrementClick(e);
+      handleDecrementClick();
       e.preventDefault();
     } else if (code === KEYCODE.RIGHT) {
-      handleIncrementClick(e);
+      handleIncrementClick();
       e.preventDefault();
     }
   };
@@ -64,9 +77,11 @@ const CustomInputNumber = ({
     e.target.value = +e.target.value;
   };
 
-  useEffect(() => {
-    onChange?.(number);
-  }, [number]);
+  useLayoutEffect(() => {
+    if (typeof value === "number") {
+      setInputValue(value);
+    }
+  }, [value]);
 
   return (
     <div
@@ -97,7 +112,7 @@ const CustomInputNumber = ({
           min={min}
           max={max}
           step={step}
-          value={number}
+          value={inputValue}
           disabled={disabled}
           data-testid="input"
         />
@@ -120,6 +135,8 @@ CustomInputNumber.propTypes = {
   min: PropTypes.number,
   max: PropTypes.number,
   step: PropTypes.number,
+  value: PropTypes.number,
+  defaultValue: PropTypes.number,
   disabled: PropTypes.bool,
   onChange: PropTypes.func,
   onBlur: PropTypes.func,
