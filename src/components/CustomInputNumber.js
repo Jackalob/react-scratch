@@ -15,25 +15,34 @@ const CustomInputNumber = ({
   onChange,
   onBlur,
 }) => {
+  const isControlled = value || value === 0;
+  const initValue = defaultValue ?? value;
+
+  if (
+    (min !== undefined && initValue < min) ||
+    (max !== undefined && initValue > max)
+  ) {
+    throw new Error("value must be greater than min and less than max");
+  }
+
   const [inputValue, setInputValue] = useState(() => {
     const initValue = defaultValue ?? value;
     return initValue ?? 0;
   });
 
-  if ((min && inputValue < min) || (max && inputValue > max)) {
-    throw new Error("value must be greater than min and less than max");
-  }
-
   const updateValue = (v) => {
-    if (isNaN(+value)) {
+    if ((v === min && inputValue === min) || (v === max && inputValue === max))
+      return;
+    if (!isControlled) {
       setInputValue(v);
     }
-    onChange?.(v);
+    if (v >= min && v <= max) {
+      onChange?.(v);
+    }
   };
 
-  // TODO  if input value > max then setInputValue to max, min also
-
   const handleChange = (e) => {
+    // TODO handle negative
     updateValue(+e.target.value);
   };
 
@@ -74,7 +83,13 @@ const CustomInputNumber = ({
   };
 
   const handleInputBlur = (e) => {
-    e.target.value = +e.target.value;
+    const number = +e.target.value;
+    e.target.value = number;
+    if (number > max) {
+      updateValue(max);
+    } else if (number < min) {
+      updateValue(min);
+    }
   };
 
   useLayoutEffect(() => {
