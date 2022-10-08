@@ -15,8 +15,7 @@ const CustomInputNumber = ({
   onChange,
   onBlur,
 }) => {
-  const isControlled = value || value === 0;
-  const initValue = defaultValue ?? value;
+  const initValue = defaultValue ?? value ?? 0;
 
   if (
     (min !== undefined && initValue < min) ||
@@ -25,43 +24,64 @@ const CustomInputNumber = ({
     throw new Error("value must be greater than min and less than max");
   }
 
-  const [inputValue, setInputValue] = useState(() => {
-    const initValue = defaultValue ?? value;
-    return initValue ?? 0;
-  });
+  const [inputValue, setInputValue] = useState(initValue);
+  const inputValueRef = useRef(initValue);
+
+  const shouldInputUpdate = (v) => {
+    let result = true;
+    if (inputValue === v || inputValueRef.current === v) result = false;
+    if (
+      (typeof v === "number" && v <= min && inputValueRef.current === min) ||
+      (typeof v === "number" && v >= max && inputValueRef.current === max)
+    ) {
+      result = false;
+    }
+    return result;
+  };
+
+  const getUpdateValue = (v) => {
+    let newValue = v;
+    if (typeof v === "number" && v > max) newValue = max;
+    if (typeof v === "number" && v < min) newValue = min;
+
+    let parsedValue = +newValue;
+    if (parsedValue > max || parsedValue < min) {
+      parsedValue = NaN;
+    }
+
+    return { newValue, parsedValue };
+  };
 
   const updateValue = (v) => {
-    if ((v === min && inputValue === min) || (v === max && inputValue === max))
-      return;
-    if (!isControlled) {
-      setInputValue(v);
-    }
-    if (v >= min && v <= max) {
-      onChange?.(v);
+    const isNumber = typeof v === "number";
+    const isNeedUpdate = shouldInputUpdate(v);
+    const { newValue, parsedValue } = getUpdateValue(v);
+
+    if (!isNeedUpdate) return;
+
+    setInputValue(newValue);
+    if (isNumber) {
+      onChange?.(newValue);
+      inputValueRef.current = newValue;
+    } else if (!isNaN(parsedValue)) {
+      onChange?.(parsedValue);
+      inputValueRef.current = parsedValue;
     }
   };
 
   const handleChange = (e) => {
-    // TODO handle negative
-    updateValue(+e.target.value);
+    // TODO handle special key e.g., e, -, empty string.
+    updateValue(e.target.value);
   };
 
   const handleDecrementClick = () => {
     if (disabled) return;
-    if (inputValue - step <= min) {
-      updateValue(min);
-    } else {
-      updateValue(inputValue - step);
-    }
+    updateValue(inputValueRef.current - step);
   };
 
   const handleIncrementClick = () => {
     if (disabled) return;
-    if (inputValue + step >= max) {
-      updateValue(max);
-    } else {
-      updateValue(inputValue + step);
-    }
+    updateValue(inputValueRef.current + step);
   };
 
   const handleKeyDown = (e) => {
@@ -83,18 +103,21 @@ const CustomInputNumber = ({
   };
 
   const handleInputBlur = (e) => {
-    const number = +e.target.value;
-    e.target.value = number;
-    if (number > max) {
-      updateValue(max);
-    } else if (number < min) {
-      updateValue(min);
+    let newValue = +e.target.value;
+    if (newValue === inputValueRef.current) return;
+    if (newValue > max) {
+      newValue = max;
+    } else if (newValue < min) {
+      newValue = min;
     }
+    updateValue(newValue);
+    e.target.value = newValue;
   };
 
   useLayoutEffect(() => {
     if (typeof value === "number") {
       setInputValue(value);
+      inputValueRef.current = value;
     }
   }, [value]);
 

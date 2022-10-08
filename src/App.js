@@ -8,7 +8,6 @@ const App = () => {
         min={-10}
         max={10}
         defaultValue={10}
-        step={3}
         onChange={(v) => console.log("onchange:", v)}
         onBlur={(e) => console.log("blur:", e)}
       />
