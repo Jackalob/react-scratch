@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom/extend-expect";
 import CustomInputNumber from "../CustomInputNumber";
@@ -108,4 +108,28 @@ test("input number is not greater than max or less than min when the value chang
     await userEvent.click(increment);
   }
   expect(input).toHaveValue(max);
+});
+
+test("change input value to max on blur if input value is greater than max", () => {
+  const max = 10;
+  render(<CustomInputNumber max={max} />);
+  const input = screen.getByTestId("input");
+
+  input.focus();
+  input.value = "100";
+  fireEvent.focusOut(input);
+
+  expect(input.value).toBe(max.toString());
+});
+
+test("change input value to min on blur if input value is less than min", () => {
+  const min = -10;
+  render(<CustomInputNumber min={min} />);
+  const input = screen.getByTestId("input");
+
+  input.focus();
+  input.value = -100;
+  fireEvent.focusOut(input);
+
+  expect(input.value).toBe(min.toString());
 });
