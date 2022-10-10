@@ -116,7 +116,7 @@ test("change input value to max on blur if input value is greater than max", () 
   const input = screen.getByTestId("input");
 
   input.focus();
-  input.value = "100";
+  fireEvent.change(input, { target: { value: "100" } });
   fireEvent.focusOut(input);
 
   expect(input.value).toBe(max.toString());
@@ -128,8 +128,41 @@ test("change input value to min on blur if input value is less than min", () => 
   const input = screen.getByTestId("input");
 
   input.focus();
-  input.value = -100;
+  fireEvent.change(input, { target: { value: "-100" } });
   fireEvent.focusOut(input);
 
   expect(input.value).toBe(min.toString());
+});
+
+test("onChange only be triggered if input value is in the range", () => {
+  const onChange = jest.fn();
+  const min = -10;
+  const max = 10;
+  render(<CustomInputNumber onChange={onChange} min={-10} max={10} />);
+
+  const input = screen.getByTestId("input");
+
+  expect(onChange).toHaveBeenCalledTimes(0);
+  fireEvent.change(input, { target: { value: "5" } });
+  expect(onChange).toHaveBeenCalledTimes(1);
+  fireEvent.change(input, { target: { value: max.toString() } });
+  expect(onChange).toHaveBeenCalledTimes(2);
+  fireEvent.change(input, { target: { value: min.toString() } });
+  expect(onChange).toHaveBeenCalledTimes(3);
+  fireEvent.change(input, { target: { value: (max + 1).toString() } });
+  expect(onChange).toHaveBeenCalledTimes(3);
+  fireEvent.change(input, { target: { value: (min - 1).toString() } });
+  expect(onChange).toHaveBeenCalledTimes(3);
+});
+
+test("onBlur is triggered correctly", () => {
+  const onBlur = jest.fn();
+  render(<CustomInputNumber onBlur={onBlur} />);
+
+  const customInputNumber = screen.getByTestId("custom-input-number");
+
+  expect(onBlur).toHaveBeenCalledTimes(0);
+  customInputNumber.focus();
+  fireEvent.focusOut(customInputNumber);
+  expect(onBlur).toHaveBeenCalledTimes(1);
 });
