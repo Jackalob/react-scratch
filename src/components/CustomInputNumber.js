@@ -70,7 +70,6 @@ const CustomInputNumber = ({
   };
 
   const handleChange = (e) => {
-    // TODO handle special key e.g., e, -, empty string.
     updateValue(e.target.value);
   };
 
@@ -104,7 +103,6 @@ const CustomInputNumber = ({
 
   const handleInputBlur = (e) => {
     let newValue = +e.target.value;
-    if (newValue === inputValueRef.current) return;
     if (newValue > max) {
       newValue = max;
     } else if (newValue < min) {
