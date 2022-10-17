@@ -121,7 +121,7 @@ const CustomInputNumber = ({
 
   return (
     <div
-      className="border-2 border-dashed border-slate-400 p-2 inline-block"
+      className="border-2 border-dashed border-slate-400 p-2 inline-block focus:outline-none"
       data-testid="custom-input-number"
       tabIndex={0}
       onBlur={handleContainerBlur}
